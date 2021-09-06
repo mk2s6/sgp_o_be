@@ -1,0 +1,64 @@
+{
+  "name": "Hotel_Management_System_MK2S_TECH",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "devStart": "set DEBUG=barebone-node-project:* & nodemon ./bin/www",
+    "test": "jest --detectOpenHandles --runInBand ./tests",
+    "verboseTest": "jest --detectOpenHandles --verbose true --runInBand ./tests",
+    "failFirstTest": "jest --detectOpenHandles --bail --verbose true --runInBand ./tests",
+    "generateDocs": "apidoc -i routes/ -o docs/"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalSetup": "./tests/global-setup.js",
+    "globalTeardown": "./tests/global-teardown.js",
+    "setupFiles": [
+      "./tests/test-suite-setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "./.vscode/",
+      "./bin/",
+      "./config/",
+      "./node_modules/",
+      "./public/",
+      "./samples/",
+      "./tools/"
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "bcryptjs": "^2.4.3",
+    "config": "^3.1.0",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.5",
+    "cron": "^1.7.1",
+    "date-and-time": "^0.14.2",
+    "db-migrate-mysql": "^2.1.1",
+    "debug": "~2.6.9",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "express-validator": "^5.3.0",
+    "http-errors": "~1.6.2",
+    "jsonwebtoken": "^8.4.0",
+    "moment": "^2.24.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.1",
+    "mysql2": "^1.6.4",
+    "nodemailer": "^5.1.1",
+    "password-validator": "^4.1.1",
+    "pify": "^4.0.1",
+    "shortid": "^2.2.15",
+    "validator": "^10.11.0",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "apidoc": "^0.20.1",
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "jest": "^24.5.0"
+  }
+}
