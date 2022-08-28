@@ -44,9 +44,22 @@ async function receiveDonation(donation) {
   );
 }
 
+async function editDonation({ name, type, amount, sponsored_item = '', occasion, donation }, { id }) {
+  return pool.execute(
+    `
+        UPDATE donations SET
+              name = ?, type = ?, amount = ?, sponsored_item = ?, received = ?, updated_by = ?
+        WHERE occasion = ? AND id = ?
+          
+      `,
+    [name, type, amount, sponsored_item, 0, id, occasion, donation],
+  );
+}
+
 module.exports = {
   insertDonation,
   getDonations,
   getDonationsSummary,
   receiveDonation,
+  editDonation,
 };

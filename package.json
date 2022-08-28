@@ -8,7 +8,7 @@
     "test": "jest --detectOpenHandles --runInBand ./tests",
     "verboseTest": "jest --detectOpenHandles --verbose true --runInBand ./tests",
     "failFirstTest": "jest --detectOpenHandles --bail --verbose true --runInBand ./tests",
-    "generateDocs": "apidoc -i routes/ -o docs/"
+    "generateDocs": "apidoc -i routes -o docs/"
   },
   "jest": {
     "testEnvironment": "node",

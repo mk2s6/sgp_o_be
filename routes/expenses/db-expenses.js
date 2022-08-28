@@ -28,8 +28,28 @@ async function payExpenses(amount, expense) {
   );
 }
 
+async function editExpenses(expenseFor, description, amount, paid, expense, occasion) {
+  return pool.execute(
+    `
+        UPDATE expenses SET expenseFor = ?, description = ?, amount = ?, paid = ? WHERE id = ? and occasion = ?;
+      `,
+    [expenseFor, description, amount, paid, expense, occasion],
+  );
+}
+
+async function payFullExpense(expense, occasion) {
+  return pool.execute(
+    `
+        UPDATE expenses SET paid = amount WHERE id = ? AND occasion = ?;
+      `,
+    [expense, occasion],
+  );
+}
+
 module.exports = {
   insertExpense,
   getExpenses,
   payExpenses,
+  payFullExpense,
+  editExpenses,
 };

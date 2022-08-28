@@ -14,9 +14,9 @@ const hf = require('../../model/helper-function');
 const router = express.Router();
 
 /**
- * @api {post} /expenses/add/:occasion Register route for admin
+ * @api {post} /expenses/add/:occasion  Add expense
  * @apiVersion 1.0.0
- * @apiGroup Admins
+ * @apiGroup Expenses
  * @apiName Register route for admin
  * @apiDescription Route for registering an admin - An executive of MK2S_LLC
  *
@@ -332,27 +332,60 @@ router.get('/list/:occasion', [vs.isNumeric('params', 'occasion', 'Please select
  *     "errors": []
  * }
  */
-router.get('/receive/:donation', [vs.isNumeric('params', 'donation', 'Please select a valid donation')], async (req, res) => {
-  const errors = vs.getValidationResult(req);
-  if (!errors.isEmpty()) {
-    const fieldsToValidate = ['donation'];
-    return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
-  }
-
-  try {
-    const [rows] = await db.receiveDonation(req.params.donation);
-    if (rows.affectedRows > 0) return res.status(200).send(responseGenerator.success('Donation update', 'Donation updated successfully', []));
-    const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
-    return res.status(400).send(responsePasswordNoMatch);
-  } catch (e) {
-    console.log(e);
-    if (e.code === 'ER_DUP_ENTRY') {
-      const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
-      return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
+router.get(
+  '/pay_full/:occasion/:expense',
+  [vs.isNumeric('params', 'expense', 'Please select a valid expense'), vs.isNumeric('params', 'expense', 'Please select a valid expense')],
+  async (req, res) => {
+    const errors = vs.getValidationResult(req);
+    if (!errors.isEmpty()) {
+      const fieldsToValidate = ['expense', 'occasion'];
+      return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
     }
-    const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
-    return res.status(400).send(responsePasswordNoMatch);
-  }
-});
+
+    try {
+      const [rows] = await db.payFullExpense(req.params.expense, req.params.occasion);
+
+      if (rows.affectedRows > 0) return res.status(200).send(responseGenerator.success('Expense update', 'Expense Paid successfully', []));
+      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+      return res.status(400).send(responsePasswordNoMatch);
+    } catch (e) {
+      console.log(e);
+      if (e.code === 'ER_DUP_ENTRY') {
+        const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
+        return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
+      }
+      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+      return res.status(400).send(responsePasswordNoMatch);
+    }
+  },
+);
+
+router.get(
+  '/update/:occasion/:expense',
+  [vs.isNumeric('params', 'expense', 'Please select a valid expense'), vs.isNumeric('params', 'expense', 'Please select a valid expense')],
+  async (req, res) => {
+    const errors = vs.getValidationResult(req);
+    if (!errors.isEmpty()) {
+      const fieldsToValidate = ['expense', 'occasion'];
+      return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
+    }
+
+    try {
+      const [rows] = await db.editExpenses(req.body.amount, req.body.paid, req.params.expense, req.params.occasion);
+
+      if (rows.affectedRows > 0) return res.status(200).send(responseGenerator.success('Expense update', 'Expense updateds successfully', []));
+      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+      return res.status(400).send(responsePasswordNoMatch);
+    } catch (e) {
+      console.log(e);
+      if (e.code === 'ER_DUP_ENTRY') {
+        const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
+        return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
+      }
+      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+      return res.status(400).send(responsePasswordNoMatch);
+    }
+  },
+);
 
 module.exports = router;
