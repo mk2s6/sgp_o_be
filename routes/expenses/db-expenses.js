@@ -28,12 +28,12 @@ async function payExpenses(amount, expense) {
   );
 }
 
-async function editExpenses(expenseFor, description, amount, paid, expense, occasion) {
+async function editExpenses({ expenseFor, description, amount, paid, expense, occasion }, { id }) {
   return pool.execute(
     `
-        UPDATE expenses SET expenseFor = ?, description = ?, amount = ?, paid = ? WHERE id = ? and occasion = ?;
+        UPDATE expenses SET expenseFor = ?, description = ?, amount = ?, paid = ?, updated_by = ? WHERE id = ? and occasion = ?;
       `,
-    [expenseFor, description, amount, paid, expense, occasion],
+    [expenseFor, description, amount, paid, id, expense, occasion],
   );
 }
 

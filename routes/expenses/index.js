@@ -117,7 +117,6 @@ router.post(
     vs.isValidStrLenWithTrim('body', 'description', 0, 100, 'Please provide valid description'),
   ],
   async (req, res) => {
-    console.log(req.body);
     const errors = vs.getValidationResult(req);
     if (!errors.isEmpty()) {
       const fieldsToValidate = ['expenseFor', 'paid', 'amount', 'description'];
@@ -360,18 +359,24 @@ router.get(
   },
 );
 
-router.get(
+router.put(
   '/update/:occasion/:expense',
-  [vs.isNumeric('params', 'expense', 'Please select a valid expense'), vs.isNumeric('params', 'expense', 'Please select a valid expense')],
+  auth.protectAdminRoute,
+  [
+    vs.isValidStrLenWithTrim('body', 'expenseFor', 3, 50, 'Please enter a valid Expense For'),
+    vs.isNumeric('body', 'paid', 'Please provide a valid paid Amount'),
+    vs.isNumeric('body', 'amount', 'Please provide valid expense amount'),
+    vs.isValidStrLenWithTrim('body', 'description', 0, 100, 'Please provide valid description'),
+  ],
   async (req, res) => {
     const errors = vs.getValidationResult(req);
     if (!errors.isEmpty()) {
-      const fieldsToValidate = ['expense', 'occasion'];
+      const fieldsToValidate = ['expenseFor', 'paid', 'amount', 'description'];
       return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
     }
 
     try {
-      const [rows] = await db.editExpenses(req.body.amount, req.body.paid, req.params.expense, req.params.occasion);
+      const [rows] = await db.editExpenses({ ...req.body, ...req.params }, req.user);
 
       if (rows.affectedRows > 0) return res.status(200).send(responseGenerator.success('Expense update', 'Expense updateds successfully', []));
       const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
