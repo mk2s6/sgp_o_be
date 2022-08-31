@@ -321,54 +321,48 @@ router.get('/list', async (req, res) => {
  *     "errors": []
  * }
  */
-router.get(
-  '/dashboard/summary/:occasion',
-  auth.protectAdminRoute,
+router.get('/dashboard/summary/:occasion', [vs.isNumeric('params', 'occasion', 'Please select a valid occasion')], async (req, res) => {
+  const errors = vs.getValidationResult(req);
+  if (!errors.isEmpty()) {
+    const fieldsToValidate = ['occasion'];
+    return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
+  }
+  const data = [
+    { title: 'donations', expected: 0, collected: 0 },
+    { title: 'expenses', expected: 0, spent: 0 },
+  ];
+  try {
+    const [rows] = await db.getDonationsSummary(req.params.occasion);
+    if (rows.length > 0) {
+      data[0].expected = rows[0].expected;
+      data[0].collected = rows[0].collected;
+    }
+  } catch (e) {
+    console.log(e);
+    if (e.code === 'ER_DUP_ENTRY') {
+      const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
+      return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
+    }
+    const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+    return res.status(400).send(responsePasswordNoMatch);
+  }
 
-  [vs.isNumeric('params', 'occasion', 'Please select a valid occasion')],
-  async (req, res) => {
-    const errors = vs.getValidationResult(req);
-    if (!errors.isEmpty()) {
-      const fieldsToValidate = ['occasion'];
-      return res.status(422).send(responseGenerator.validationError(errors.mapped(), fieldsToValidate));
+  try {
+    const [rows] = await db.getExpensesSummary(req.params.occasion);
+    if (rows.length > 0) {
+      data[1].expected = rows[0].expected;
+      data[1].spent = rows[0].spent;
     }
-    const data = [
-      { title: 'donations', expected: 0, collected: 0 },
-      { title: 'expenses', expected: 0, spent: 0 },
-    ];
-    try {
-      const [rows] = await db.getDonationsSummary(req.params.occasion);
-      if (rows.length > 0) {
-        data[0].expected = rows[0].expected;
-        data[0].collected = rows[0].collected;
-      }
-    } catch (e) {
-      console.log(e);
-      if (e.code === 'ER_DUP_ENTRY') {
-        const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
-        return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
-      }
-      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
-      return res.status(400).send(responsePasswordNoMatch);
+  } catch (e) {
+    console.log(e);
+    if (e.code === 'ER_DUP_ENTRY') {
+      const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
+      return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
     }
-
-    try {
-      const [rows] = await db.getExpensesSummary(req.params.occasion);
-      if (rows.length > 0) {
-        data[1].expected = rows[0].expected;
-        data[1].spent = rows[0].spent;
-      }
-    } catch (e) {
-      console.log(e);
-      if (e.code === 'ER_DUP_ENTRY') {
-        const beUserDuplicateEntry = error.errList.dbError.ERR_INSERT_OCCASION_DUPLICATE_ENTRY;
-        return res.status(400).send(responseGenerator.dbError(beUserDuplicateEntry));
-      }
-      const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
-      return res.status(400).send(responsePasswordNoMatch);
-    }
-    return res.status(200).send(responseGenerator.success('Occasions Summary', 'Occasions Summary retrieved successfully', data));
-  },
-);
+    const responsePasswordNoMatch = responseGenerator.internalError(error.errList.internalError.ERR_INSERT_USER_INSERT_FAILURE);
+    return res.status(400).send(responsePasswordNoMatch);
+  }
+  return res.status(200).send(responseGenerator.success('Occasions Summary', 'Occasions Summary retrieved successfully', data));
+});
 
 module.exports = router;
